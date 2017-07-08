@@ -4,12 +4,15 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * User
  *
  * @ORM\Table(name="user")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\UserRepository")
+ * @UniqueEntity("email")
  */
 class User implements AdvancedUserInterface
 {
@@ -23,16 +26,26 @@ class User implements AdvancedUserInterface
     private $id;
 
     /**
-     * @var string
-     *
+     * @Assert\NotBlank()
+     * @Assert\Email()
      * @ORM\Column(name="email", type="string", length=255, unique=true)
      */
     private $email;
 
     /**
+     * @Assert\NotBlank()
+     * @Assert\Length(max=4096)
+     * @Assert\Regex(
+     *     pattern="/[0-9!@#$%^*_-]+/",
+     *     message="Doit inclure au moins un chiffre ou !,@,#,$,%,^,*,_,-"
+     * )
+     */
+    private $plainPassword;
+
+    /**
      * @var string
      *
-     * @ORM\Column(name="password", type="string", length=255)
+     * @ORM\Column(name="password", type="string", length=64)
      */
     private $password;
 
@@ -115,6 +128,25 @@ class User implements AdvancedUserInterface
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getPlainPassword()
+    {
+        return $this->plainPassword;
+    }
+
+    /**
+     * @param mixed $plainPassword
+     * @return User
+     */
+    public function setPlainPassword($plainPassword)
+    {
+        $this->plainPassword = $plainPassword;
+        return $this;
+    }
+
 
     /**
      * Get roles
